@@ -1,0 +1,149 @@
+﻿<Window x:Class="Seshat.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:seshat="clr-namespace:Seshat.Controls"
+        Title="Seshat" Width="900" Height="720" Background="White" MinWidth="900" MinHeight="600" Closed="Window_Closed">
+    <Window.Resources>
+        <RoutedUICommand x:Key="chapterCmd" Text="addChapter" />
+        <RoutedUICommand x:Key="sentenceCmd" Text="addSentence" />
+        <RoutedUICommand x:Key="saveCmd" Text="saveTiming" />
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource chapterCmd}" Executed="addChapter" />
+        <CommandBinding Command="{StaticResource sentenceCmd}" Executed="addSentence" />
+        <CommandBinding Command="{StaticResource saveCmd}" Executed="saveClicked" />
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Key="Add" Command="{StaticResource chapterCmd}" />
+        <KeyBinding Key="Enter" Command="{StaticResource sentenceCmd}" />
+        <KeyBinding Key="NumPad0" Command="{StaticResource saveCmd}" />
+    </Window.InputBindings>
+    <Grid>
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="/Seshat;component/Assets/Resources.xaml" />
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Menu VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="110" Background="#260C000F" Foreground="#FF0F0F0F">
+            <MenuItem Header="File" FontFamily="Segoe UI Light" FontSize="14">
+                <MenuItem Header="Open" Click="OpenBook_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuImportAudio" Header="Import Audio" Click="OpenAudio_Clicked" />
+                <MenuItem Header="Exit" Click="Exit_Clicked"/>
+            </MenuItem>
+            <MenuItem Header="Media" FontFamily="Segoe UI Light" FontSize="14">
+                <MenuItem IsEnabled="False" x:Name="menuPlay" Header="Play / Pause" Click="Play_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuNext" Header="Next Chapter" Click="Next_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuPrev" Header="Previous Chapter" Click="Previous_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuSyncAudio" Header="Sync Audio" Click="SyncAudio_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuSyncBook" Header="Sync Book" Click="SyncBook_Clicked" />
+            </MenuItem>
+            <MenuItem Header="Help" FontFamily="Segoe UI Light" FontSize="14">
+                <MenuItem Header="Help" Click="ShowHelp" />
+                <MenuItem Header="About" Click="ShowAbout" />
+            </MenuItem>
+            <MenuItem Header="Tools" FontFamily="Segoe UI Light" FontSize="14">
+                <MenuItem IsEnabled="False" x:Name="menuCreateManualTiming" Header="Create a manual timing file" Click="Manual_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuCreateSpeechTiming" Header="Create a speech estimated timing file" Click="CreateSpeechTiming_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuCreateEstimatedTiming" Header="Create an estimated timing file" Click="CreateEstimatedTiming_Clicked" />
+                <MenuItem Header="Compare timing files" Click="Compare_Clicked" />
+            </MenuItem>
+        </Menu>
+
+        <seshat:PlayButton x:Name="playBtn" Click="Play_Clicked" IsEnabled="False" HorizontalAlignment="Left" Margin="145,25,0,0" VerticalAlignment="Top" Width="35" Height="35" ToolTip="Play / Pause">
+            <seshat:PlayButton.Image>/Seshat;component/Assets/Normal/play.png</seshat:PlayButton.Image>
+            <seshat:PlayButton.ImageDisabled>/Seshat;component/Assets/Disabled/playDisabled.png</seshat:PlayButton.ImageDisabled>
+            <seshat:PlayButton.PausedImage>/Seshat;component/Assets/Normal/pause.png</seshat:PlayButton.PausedImage>
+            <seshat:PlayButton.ImageHover>/Seshat;component/Assets/Hover/playHover.png</seshat:PlayButton.ImageHover>
+            <seshat:PlayButton.PausedHoverImage>/Seshat;component/Assets/Hover/pauseHover.png</seshat:PlayButton.PausedHoverImage>
+        </seshat:PlayButton>
+
+        <seshat:ImageButton Visibility="Hidden" x:Name="syncAudioBtn" IsEnabled="False" Click="SyncAudio_Clicked" HorizontalAlignment="Left" Margin="746,15,0,0" VerticalAlignment="Top" Width="50" Height="50" ToolTip="Stops the audio completely and syncs the book to the current audio position.">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/syncAudio.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/syncDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/syncAudioHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="syncBookBtn" IsEnabled="False" Click="SyncBook_Clicked" HorizontalAlignment="Left" Margin="821,15,0,0" VerticalAlignment="Top" Width="50" Height="50" ToolTip="Stops the audio completely and syncs the book to the current audio position.">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/syncBook.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/syncDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/syncBookHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="stopBtn" Click="Stop_Clicked" IsEnabled="False" HorizontalAlignment="Left" Margin="441,25,0,0" VerticalAlignment="Top" Width="35" Height="35" ToolTip="Go to previous chapter.">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/stop.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/stopDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/stopHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="prevBtn" Click="Previous_Clicked" IsEnabled="False" HorizontalAlignment="Left" Margin="477,25,0,0" VerticalAlignment="Top" Width="35" Height="35" ToolTip="Go to previous chapter.">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/backward.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/backwardDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/backwardHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="nextBtn" Click="Next_Clicked" IsEnabled="False" HorizontalAlignment="Left" Margin="517,25,0,0" VerticalAlignment="Top" Width="35" Height="35" ToolTip="Go to next chapter">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/forward.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/forwardDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/forwardHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+
+        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" TextAlignment="Left" Margin="165,55,0,0">
+            <Run x:Name="currentFile" Text="" />
+        </TextBlock>
+
+        <seshat:ImageButton x:Name="volImg" IsEnabled="False" HorizontalAlignment="Left" Margin="558,25,0,0" VerticalAlignment="Top" Width="35" Height="35">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/soundMute.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Normal/sound4.png</seshat:ImageButton.ImageHover>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/soundMuteDisabled.png</seshat:ImageButton.ImageDisabled>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="openBookBtn" Click="OpenBook_Clicked" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="32" Height="32" BorderBrush="{x:Null}" ToolTip="Open book">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/openBook.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/openBookHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+        <seshat:ImageButton x:Name="importAudioBtn" Click="OpenAudio_Clicked" IsEnabled="False" HorizontalAlignment="Left" Margin="50,25,0,0" VerticalAlignment="Top" Width="32" Height="32" BorderBrush="{x:Null}" ToolTip="Import audio.">
+            <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/loadAudio.png</seshat:ImageButton.Image>
+            <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/loadAudioDisabled.png</seshat:ImageButton.ImageDisabled>
+            <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/loadAudioHover.png</seshat:ImageButton.ImageHover>
+        </seshat:ImageButton>
+
+        <Slider x:Name="playerSlider" ValueChanged="Time_Changed" IsEnabled="False" HorizontalAlignment="Left" Margin="185,34,0,0" VerticalAlignment="Top" Width="250" BorderBrush="Black" Foreground="Black" Background="#7F000000" SmallChange="1" Interval="1000"/>
+        <TextBlock MouseLeftButtonUp="specifyTime" x:Name="timeElapsed" VerticalAlignment="Top" HorizontalAlignment="Left" TextAlignment="Left" Margin="185,13,0,0" TextWrapping="Wrap" FontFamily="Segoe WP SemiLight" FontSize="16" Text="00:00:00"/>
+        <TextBlock x:Name="timeTotal" VerticalAlignment="Top" HorizontalAlignment="Left" TextAlignment="Left"  Margin="254,13,0,0" TextWrapping="Wrap" FontFamily="Segoe WP SemiLight" FontSize="16" Text="00:00:00" />
+        <TextBlock TextAlignment="Center" HorizontalAlignment="Left"  Margin="245,12,0,641" TextWrapping="Wrap" FontFamily="Segoe WP Semibold" FontSize="16" RenderTransformOrigin="0.407,0.5"><Run Language="sv-se" Text="/"/></TextBlock>
+
+        <TextBlock HorizontalAlignment="Left" Margin="597,11,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Light" FontSize="18" Width="114" Height="31" Text="Volume" />
+        <Slider x:Name="volumeSlider" ValueChanged="Volume_Changed" IsEnabled="False" Value="0" HorizontalAlignment="Left" Margin="597,34,0,0" VerticalAlignment="Top" Width="114" Background="#7F000000" Maximum="1" SmallChange="0.01" LargeChange="0.25" />
+
+        <Grid x:Name="progressbarGrid" Visibility="Hidden" Margin="185,3,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="526" >
+            <ProgressBar x:Name="progressBar" HorizontalAlignment="Stretch" Height="12" VerticalAlignment="Top" />
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="11" Margin="0, -2" FontFamily="Segoe UI Semibold">
+                <Run x:Name="preProgressTxt" Text="Sync Progress: "/>
+                <Run x:Name="progressTxt" Text="0"/>
+                <Run x:Name="afterProgressTxt" Text="%"/>
+            </TextBlock>
+        </Grid>
+
+        <Grid x:Name="tabGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0, 75, 0, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" SelectionChanged="TabChanged" Grid.Column="0" />
+            <Grid x:Name="manualGrid" Visibility="Collapsed" Grid.Column="1" Margin="0, 22, 0, 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button IsEnabled="True" x:Name="chapterBtn" Command="{StaticResource chapterCmd}" Content="Start" Grid.Column="0" BorderThickness="1,1,0,1" ToolTip="Keybind: Numpad Plus" />
+                    <Button IsEnabled="False" x:Name="sentenceBtn" Command="{StaticResource sentenceCmd}" Content="Sentence" Grid.Column="1" BorderThickness="0,1" ToolTip="Keybind: Enter" />
+                    <Button IsEnabled="False" x:Name="saveBtb" Command="{StaticResource saveCmd}" Content="Pause" Grid.Column="2" BorderThickness="0,1,0,1" ToolTip="Keybind: Numpad 0" />
+                </Grid>
+                <ListBox Grid.Row="1" x:Name="listBox" HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Stretch" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

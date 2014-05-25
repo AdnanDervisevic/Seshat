@@ -1,0 +1,23 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:chartingToolkit="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit" x:Class="Seshat.xaml.SpecifyTime"
+        Title="Specity Time" Height="150" Width="210" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" TextAlignment="Center" Width="50" Text="Hours" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" TextAlignment="Center" Width="50" Text="Minutes" VerticalAlignment="Top" Grid.Column="1"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" TextAlignment="Center" Width="50" Text="Seconds" VerticalAlignment="Top" Grid.Column="2"/>
+        
+        <ComboBox IsEnabled="True" x:Name="hours" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="50" IsReadOnly="True" SelectionChanged="hours_SelectionChanged"/>
+        <ComboBox IsEnabled="False" x:Name="minutes" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="50" IsReadOnly="True" Grid.Column="1" SelectionChanged="minutes_SelectionChanged" />
+        <ComboBox IsEnabled="False" x:Name="seconds" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="50" IsReadOnly="True" Grid.Column="2" SelectionChanged="seconds_SelectionChanged" />
+
+        <Button IsEnabled="False" x:Name="okBtn" Click="okClicked" Content="OK" HorizontalAlignment="Left" Margin="50,80,0,0" VerticalAlignment="Top" Width="75" Grid.Column="1" Grid.ColumnSpan="2"/>
+    </Grid>
+</Window>
