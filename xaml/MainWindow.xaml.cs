@@ -325,7 +325,7 @@ namespace Seshat
                 bool found = false;
                 foreach (Sentence sentence in chapter.Sentences)
                 {
-                    if (sentence.FirstAudioPosition.Position < currentTime && sentence.FirstAudioPosition.AudioFileIndex != -1)
+                    if (sentence.FirstAudioPosition.Position <= currentTime && sentence.FirstAudioPosition.AudioFileIndex != -1)
                         str = sentence.OriginalText;
                     else
                     {
@@ -338,24 +338,29 @@ namespace Seshat
                     break;
             }
 
-            DispHTMLBody body = ((DispHTMLBody)((DispHTMLDocument)this.currentTab.Browser.Document).body);
-            IHTMLTxtRange range = body.createTextRange();
-
-            if (range.findText(str, 0, 0))
+            if (!string.IsNullOrWhiteSpace(str))
             {
-                try
+                DispHTMLBody body = ((DispHTMLBody)((DispHTMLDocument)this.currentTab.Browser.Document).body);
+                IHTMLTxtRange range = body.createTextRange();
+
+                if (range.findText(str, 0, 0))
                 {
-                    range.select();
+                    try
+                    {
+                        range.select();
+                    }
+                    catch (System.Runtime.InteropServices.COMException)
+                    {
+                        System.Windows.MessageBox.Show(this, "Can't sync to book.");
+                    }
                 }
-                catch (System.Runtime.InteropServices.COMException)
+                else
                 {
-                    System.Windows.MessageBox.Show(this, "Can't sync to book.");
+                    System.Windows.MessageBox.Show(this, "There is no text for this part of the audio.");
                 }
             }
             else
-            {
-                System.Windows.MessageBox.Show(this, "There is no text for this part of the audio.");
-            }
+                MessageBox.Show(this, "There is no text for this part of the audio.");
         }
 
         /// <summary>
@@ -608,68 +613,76 @@ namespace Seshat
         /// </summary>
         private void SyncAudio_Clicked(object sender, RoutedEventArgs e)
         {
-            if (this.currentTab != null)
+            try
             {
-                this.trackbarTimer.Stop();
-
-                IHTMLDocument2 htmlDoc = this.currentTab.Browser.Document as IHTMLDocument2;
-
-                if (htmlDoc.selection.type == "Text")
+                if (this.currentTab != null)
                 {
-                    IHTMLTxtRange range = (IHTMLTxtRange)htmlDoc.selection.createRange();
+                    this.trackbarTimer.Stop();
 
-                    if (!string.IsNullOrWhiteSpace(range.text))
+                    IHTMLDocument2 htmlDoc = this.currentTab.Browser.Document as IHTMLDocument2;
+
+                    if (htmlDoc.selection.type == "Text")
                     {
-                        string content = Regex.Replace(range.text, @"\t|\n|\r", "");
+                        IHTMLTxtRange range = (IHTMLTxtRange)htmlDoc.selection.createRange();
 
-                        string[] abbWithDots = new string[] { "Mr. ", "Mrs. ", "Ms. ", "Sir. ", "A.A ", "A.A.S ", "A.B.D ", "A.F.A ", "B.A. ", "B.F.A ", "B.S. ", "M.A. ", "M.Ed. ", "M.S. ", "Dr. ", "Esq. ", "Prof. ", "Ph.D. ", "M.D. ", "J.D. " };
-                        string[] abbWithoutDots = new string[] { "Mr ", "Mrs ", "Ms ", "Sir ", "AA ", "AAS ", "ABD ", "AFA ", "BA ", "BFA ", "BS ", "MA ", "MEd ", "MS ", "Dr ", "Esq ", "Prof ", "PhD ", "MD ", "JD " };
-
-                        for (int i = 0; i < abbWithDots.Length; i++)
-                            content = content.Replace(abbWithDots[i], abbWithoutDots[i]);
-
-                        string[] sentences = Regex.Split(content, @"(?<=[\.])");
-
-                        for (int i = 0; i < sentences.Length; i++)
+                        if (!string.IsNullOrWhiteSpace(range.text))
                         {
-                            for (int j = 0; j < abbWithDots.Length; j++)
-                                sentences[i] = sentences[i].Replace(abbWithoutDots[j], abbWithDots[j]);
-                        }
+                            string content = Regex.Replace(range.text, @"\t|\n|\r", "");
 
-                        string firstSentence = sentences[0].Trim().RemoveChars('“', '’', '‘', '”');
+                            string[] abbWithDots = new string[] { "Mr. ", "Mrs. ", "Ms. ", "Sir. ", "A.A ", "A.A.S ", "A.B.D ", "A.F.A ", "B.A. ", "B.F.A ", "B.S. ", "M.A. ", "M.Ed. ", "M.S. ", "Dr. ", "Esq. ", "Prof. ", "Ph.D. ", "M.D. ", "J.D. " };
+                            string[] abbWithoutDots = new string[] { "Mr ", "Mrs ", "Ms ", "Sir ", "AA ", "AAS ", "ABD ", "AFA ", "BA ", "BFA ", "BS ", "MA ", "MEd ", "MS ", "Dr ", "Esq ", "Prof ", "PhD ", "MD ", "JD " };
 
-                        List<Sentence> matches = new List<Sentence>();
-                        foreach (Chapter chapter in this.currentTab.Book.Chapters)
-                            foreach (Sentence sentence in chapter.Sentences)
-                                if (sentence.Text.Contains(firstSentence))
-                                    matches.Add(sentence);
+                            for (int i = 0; i < abbWithDots.Length; i++)
+                                content = content.Replace(abbWithDots[i], abbWithoutDots[i]);
 
-                        if (matches.Count == 1)
-                        {
-                            if (matches[0].FirstAudioPosition.AudioFileIndex == -1 || matches[0].FirstAudioPosition.AudioFileIndex >= this.currentTab.Book.AudioFiles.Count)
+                            string[] sentences = Regex.Split(content, @"(?<=[\.])");
+
+                            for (int i = 0; i < sentences.Length; i++)
                             {
-                                MessageBox.Show(this, "Could not find any audio for this sentence.");
+                                for (int j = 0; j < abbWithDots.Length; j++)
+                                    sentences[i] = sentences[i].Replace(abbWithoutDots[j], abbWithDots[j]);
+                            }
+
+                            string firstSentence = sentences[0].Trim().RemoveChars('“', '’', '‘', '”');
+
+                            List<Sentence> matches = new List<Sentence>();
+                            foreach (Chapter chapter in this.currentTab.Book.Chapters)
+                                foreach (Sentence sentence in chapter.Sentences)
+                                    if (sentence.Text.Contains(firstSentence))
+                                        matches.Add(sentence);
+
+                            if (matches.Count == 1)
+                            {
+                                if (matches[0].FirstAudioPosition.AudioFileIndex == -1 || matches[0].FirstAudioPosition.AudioFileIndex >= this.currentTab.Book.AudioFiles.Count)
+                                {
+                                    MessageBox.Show(this, "Could not find any audio for this sentence.");
+                                }
+                                else
+                                {
+                                    if (this.audioPlayer.PlaybackState == PlaybackState.Playing)
+                                        this.audioPlayer.Stop();
+
+                                    this.currentTab.SelectAudioFile(matches[0].FirstAudioPosition.AudioFileIndex);
+                                    this.currentFile.Text = System.IO.Path.GetFileNameWithoutExtension(this.currentTab.CurrentAudioFile.FileName);
+                                    this.audioPlayer = new WaveOut();
+                                    this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
+                                    this.playerSlider.Value = matches[0].FirstAudioPosition.Position.TotalSeconds;
+
+                                    this.audioPlayer.Play();
+                                    this.trackbarTimer.Start();
+                                    this.playBtn.IsPlaying = true;
+                                }
                             }
                             else
-                            {
-                                if (this.audioPlayer.PlaybackState == PlaybackState.Playing)
-                                    this.audioPlayer.Stop();
-
-                                this.currentTab.SelectAudioFile(matches[0].FirstAudioPosition.AudioFileIndex);
-                                this.currentFile.Text = System.IO.Path.GetFileNameWithoutExtension(this.currentTab.CurrentAudioFile.FileName);
-                                this.audioPlayer = new WaveOut();
-                                this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
-                                this.playerSlider.Value = matches[0].FirstAudioPosition.Position.TotalSeconds;
-
-                                this.audioPlayer.Play();
-                                this.trackbarTimer.Start();
-                                this.playBtn.IsPlaying = true;
-                            }
+                                MessageBox.Show("Too many hits, try select another sentence.");
                         }
-                        else
-                            MessageBox.Show("Too many hits, try select another sentence.");
                     }
+                    else
+                        MessageBox.Show("No sentence is selected or something went wrong. Please select a (new) sentence nearby and try again.");
                 }
+            }
+            catch (Exception ex)
+            {
             }
         }
 
