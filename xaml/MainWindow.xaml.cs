@@ -504,103 +504,113 @@ namespace Seshat
         /// </summary>
         private void Time_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (this.currentTab != null && this.currentTab.CurrentAudioFile != null)
+            try
             {
-                if (isMouseSlider)
-                    this.trackbarTimer.Stop();
-
-                TimeSpan targetTime = TimeSpan.FromSeconds(e.NewValue);
-                TimeSpan totalTime = TimeSpan.Zero;
-
-                int i = 0;
-                for (i = 0; i < this.currentTab.Book.AudioFiles.Count; i++)
+                if (this.currentTab != null && this.currentTab.CurrentAudioFile != null)
                 {
-                    if (totalTime + this.currentTab.Book.AudioFiles[i].TotalTime > targetTime)
-                        break;
+                    if (isMouseSlider)
+                        this.trackbarTimer.Stop();
 
-                    totalTime += this.currentTab.Book.AudioFiles[i].TotalTime;
-                }
+                    TimeSpan targetTime = TimeSpan.FromSeconds(e.NewValue);
+                    TimeSpan totalTime = TimeSpan.Zero;
 
-                if (isMouseSlider)
-                {
-                    if (this.currentTab.CurrentAudioFileIndex != i)
+                    int i = 0;
+                    for (i = 0; i < this.currentTab.Book.AudioFiles.Count; i++)
                     {
-                        PlaybackState oldState = this.audioPlayer.PlaybackState;
-                        this.audioPlayer.Stop();
+                        if (totalTime + this.currentTab.Book.AudioFiles[i].TotalTime > targetTime)
+                            break;
 
-                        this.currentTab.SelectAudioFile(i);
+                        totalTime += this.currentTab.Book.AudioFiles[i].TotalTime;
+                    }
 
-                        if (this.currentTab.CurrentAudioFile == null)
+                    if (isMouseSlider)
+                    {
+                        if (this.currentTab.CurrentAudioFileIndex != i)
                         {
-                            this.currentTab.SelectAudioFile(0);
-                            this.currentTab.CurrentAudioFile.CurrentTime = TimeSpan.Zero;
-                            this.audioPlayer = new WaveOut();
-                            this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
-                            this.playBtn.IsPlaying = false;
-                            this.isMouseSlider = false;
-                        }
-                        else
-                        {
-                            this.audioPlayer = new WaveOut();
-                            this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
+                            PlaybackState oldState = this.audioPlayer.PlaybackState;
+                            this.audioPlayer.Stop();
 
-                            this.currentFile.Text = Path.GetFileNameWithoutExtension(this.currentTab.CurrentAudioFile.FileName);
+                            this.currentTab.SelectAudioFile(i);
 
-                            int j = 0;
-                            for (j = 0; j < this.currentTab.Book.Chapters.Count; j++)
+                            if (this.currentTab.CurrentAudioFile == null)
                             {
-                                bool foundChapter = false;
+                                this.currentTab.SelectAudioFile(0);
+                                this.currentTab.CurrentAudioFile.CurrentTime = TimeSpan.Zero;
+                                this.audioPlayer = new WaveOut();
+                                this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
+                                this.playBtn.IsPlaying = false;
+                                this.isMouseSlider = false;
+                            }
+                            else
+                            {
+                                this.audioPlayer = new WaveOut();
+                                this.audioPlayer.Init(this.currentTab.CurrentAudioFile);
 
-                                foreach (Sentence sentence in this.currentTab.Book.Chapters[j].Sentences)
+                                this.currentFile.Text = Path.GetFileNameWithoutExtension(this.currentTab.CurrentAudioFile.FileName);
+
+                                int j = 0;
+                                for (j = 0; j < this.currentTab.Book.Chapters.Count; j++)
                                 {
-                                    if (sentence.FirstAudioPosition.Position >= totalTime)
+                                    bool foundChapter = false;
+
+                                    foreach (Sentence sentence in this.currentTab.Book.Chapters[j].Sentences)
                                     {
-                                        foundChapter = true;
-                                        break;
+                                        if (sentence.FirstAudioPosition.Position >= totalTime)
+                                        {
+                                            foundChapter = true;
+                                            break;
+                                        }
                                     }
+
+                                    if (foundChapter)
+                                        break;
                                 }
 
-                                if (foundChapter)
-                                    break;
+                                this.nextBtn.IsEnabled = (j + 1 < this.currentTab.Book.Chapters.Count && this.currentTab.Book.Chapters[j + 1].Sentences.Count > 0 && this.currentTab.Book.Chapters[j + 1].Sentences[0].FirstAudioPosition.AudioFileIndex != -1);
+                                this.menuNext.IsEnabled = this.nextBtn.IsEnabled;
+
+                                this.prevBtn.IsEnabled = (j > 0 && this.currentTab.Book.Chapters[j - 1].Sentences.Count > 0 && this.currentTab.Book.Chapters[j - 1].Sentences[0].FirstAudioPosition.AudioFileIndex != -1);
+                                this.menuPrev.IsEnabled = this.prevBtn.IsEnabled;
+
+                                if (oldState == PlaybackState.Playing)
+                                    this.audioPlayer.Play();
                             }
+                        }
 
-                            this.nextBtn.IsEnabled = (j + 1 < this.currentTab.Book.Chapters.Count && this.currentTab.Book.Chapters[j + 1].Sentences.Count > 0 && this.currentTab.Book.Chapters[j + 1].Sentences[0].FirstAudioPosition.AudioFileIndex != -1);
-                            this.menuNext.IsEnabled = this.nextBtn.IsEnabled;
+                        if (this.isMouseSlider)
+                            this.currentTab.CurrentAudioFile.CurrentTime = targetTime - totalTime;
+                    }
 
-                            this.prevBtn.IsEnabled = (j > 0 && this.currentTab.Book.Chapters[j - 1].Sentences.Count > 0 && this.currentTab.Book.Chapters[j - 1].Sentences[0].FirstAudioPosition.AudioFileIndex != -1);
-                            this.menuPrev.IsEnabled = this.prevBtn.IsEnabled;
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append((targetTime.Days * 24 + targetTime.Hours).ToString("D2"));
+                    sb.Append(":");
+                    sb.Append(targetTime.Minutes.ToString("D2"));
+                    sb.Append(":");
+                    sb.Append(targetTime.Seconds.ToString("D2"));
 
-                            if (oldState == PlaybackState.Playing)
-                                this.audioPlayer.Play();
+                    this.timeElapsed.Text = sb.ToString();
+
+                    string xmlFile = MainWindow.TimingsFolder + @"\" + this.currentTab.Book.Checksum + ".xml";
+                    lock (this.currentTab.xmlLock)
+                    {
+                        if (File.Exists(xmlFile))
+                        {
+                            XmlDocument doc = new XmlDocument();
+                            doc.Load(xmlFile);
+                            ((XmlElement)doc.GetElementsByTagName("Book").Item(0)).SetAttribute("CurrentAudioFileIndex", Convert.ToString(this.currentTab.CurrentAudioFileIndex));
+                            ((XmlElement)doc.GetElementsByTagName("Book").Item(0)).SetAttribute("CurrentAudioPosition", Convert.ToString(this.currentTab.CurrentAudioFile.CurrentTime));
+                            doc.Save(xmlFile);
                         }
                     }
 
-                    if (this.isMouseSlider)
-                        this.currentTab.CurrentAudioFile.CurrentTime = targetTime - totalTime;
+                    if (isMouseSlider)
+                        this.trackbarTimer.Start();
+
+                    this.isMouseSlider = true;
                 }
-
-                StringBuilder sb = new StringBuilder();
-                sb.Append((targetTime.Days * 24 + targetTime.Hours).ToString("D2"));
-                sb.Append(":");
-                sb.Append(targetTime.Minutes.ToString("D2"));
-                sb.Append(":");
-                sb.Append(targetTime.Seconds.ToString("D2"));
-
-                this.timeElapsed.Text = sb.ToString();
-                                 
-                string xmlFile = MainWindow.TimingsFolder + @"\" + this.currentTab.Book.Checksum + ".xml";
-                lock (this.currentTab.xmlLock)
-                {
-                    if (File.Exists(xmlFile))
-                    {
-                        XmlDocument doc = new XmlDocument();
-                        doc.Load(xmlFile);
-                        ((XmlElement)doc.GetElementsByTagName("Book").Item(0)).SetAttribute("CurrentAudioFileIndex", Convert.ToString(this.currentTab.CurrentAudioFileIndex));
-                        ((XmlElement)doc.GetElementsByTagName("Book").Item(0)).SetAttribute("CurrentAudioPosition", Convert.ToString(this.currentTab.CurrentAudioFile.CurrentTime));
-                        doc.Save(xmlFile);
-                    }
-                }
-
+            }
+            catch (Exception ex) 
+            {
                 if (isMouseSlider)
                     this.trackbarTimer.Start();
 

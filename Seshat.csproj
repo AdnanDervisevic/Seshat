@@ -178,9 +178,6 @@
     <Resource Include="Assets\Disabled\stopDisabled.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\Disabled\syncDisabled.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Assets\Hover\openBookHover.png" />
   </ItemGroup>
   <ItemGroup>
@@ -194,6 +191,9 @@
     <Resource Include="Assets\Hover\pauseHover.png" />
     <Resource Include="Assets\Hover\playHover.png" />
     <Resource Include="Assets\Hover\stopHover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Disabled\syncDisabled.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

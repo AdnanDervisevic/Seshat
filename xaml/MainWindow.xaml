@@ -47,7 +47,7 @@
             <MenuItem Header="Tools" FontFamily="Segoe UI Light" FontSize="14">
                 <MenuItem IsEnabled="False" x:Name="menuCreateManualTiming" Header="Create a manual timing file" Click="Manual_Clicked" />
                 <MenuItem IsEnabled="False" x:Name="menuCreateSpeechTiming" Header="Create a speech estimated timing file" Click="CreateSpeechTiming_Clicked" />
-                <MenuItem IsEnabled="False" x:Name="menuCreateEstimatedTiming" Header="Create an estimated timing file" Click="CreateEstimatedTiming_Clicked" />
+                <MenuItem IsEnabled="False" x:Name="menuCreateEstimatedTiming" Visibility="Collapsed" Header="Create an estimated timing file" Click="CreateEstimatedTiming_Clicked" />
                 <MenuItem Header="Compare timing files" Click="Compare_Clicked" />
             </MenuItem>
         </Menu>
