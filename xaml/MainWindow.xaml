@@ -60,7 +60,7 @@
             <seshat:PlayButton.PausedHoverImage>/Seshat;component/Assets/Hover/pauseHover.png</seshat:PlayButton.PausedHoverImage>
         </seshat:PlayButton>
 
-        <seshat:ImageButton Visibility="Hidden" x:Name="syncAudioBtn" IsEnabled="False" Click="SyncAudio_Clicked" HorizontalAlignment="Left" Margin="746,15,0,0" VerticalAlignment="Top" Width="50" Height="50" ToolTip="Stops the audio completely and syncs the book to the current audio position.">
+        <seshat:ImageButton Visibility="Hidden" x:Name="syncAudioBtn" IsEnabled="False" Click="SyncAudio_Clicked" HorizontalAlignment="Left" Margin="746,15,0,0" VerticalAlignment="Top" Width="50" Height="50" ToolTip="Starts playing from the selected sentence or paragraph.">
             <seshat:ImageButton.Image>/Seshat;component/Assets/Normal/syncAudio.png</seshat:ImageButton.Image>
             <seshat:ImageButton.ImageDisabled>/Seshat;component/Assets/Disabled/syncDisabled.png</seshat:ImageButton.ImageDisabled>
             <seshat:ImageButton.ImageHover>/Seshat;component/Assets/Hover/syncAudioHover.png</seshat:ImageButton.ImageHover>

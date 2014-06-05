@@ -31,9 +31,9 @@ namespace Seshat.Structure.Differences
             get
             {
                 List<TimeSpan> positions = new List<TimeSpan>();
-                
+
                 for (int i = 0; i < Sentences.Count; i++)
-                    positions.Add(Sentences[i].Position);
+                    positions.Add(TimeSpan.FromSeconds(Math.Abs(Sentences[i].Position.TotalSeconds)));
 
                 return new TimeSpan(Convert.ToInt64(positions.Average(obj => obj.Ticks)));
             }
@@ -49,7 +49,7 @@ namespace Seshat.Structure.Differences
                 List<TimeSpan> positions = new List<TimeSpan>();
 
                 for (int i = 0; i < Sentences.Count; i++)
-                    positions.Add(Sentences[i].Position);
+                    positions.Add(TimeSpan.FromSeconds(Math.Abs(Sentences[i].Position.TotalSeconds)));
 
                 positions.Sort();
 

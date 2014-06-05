@@ -39,7 +39,7 @@ namespace Seshat.Structure.Differences
 
                 for (int i = 0; i < Chapters.Count; i++)
                     for (int j = 0; j < Chapters[i].Sentences.Count; j++)
-                        positions.Add(Chapters[i].Sentences[j].Position);
+                        positions.Add(TimeSpan.FromSeconds(Math.Abs(Chapters[i].Sentences[j].Position.TotalSeconds)));
 
                 return new TimeSpan(Convert.ToInt64(positions.Average(obj => obj.Ticks)));
             }
@@ -56,7 +56,7 @@ namespace Seshat.Structure.Differences
 
                 for (int i = 0; i < Chapters.Count; i++)
                     for (int j = 0; j < Chapters[i].Sentences.Count; j++)
-                        positions.Add(Chapters[i].Sentences[j].Position);
+                        positions.Add(TimeSpan.FromSeconds(Math.Abs(Chapters[i].Sentences[j].Position.TotalSeconds)));
 
                 positions.Sort();
 

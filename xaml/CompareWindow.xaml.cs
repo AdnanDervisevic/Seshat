@@ -76,18 +76,18 @@ namespace Seshat.xaml
                 using (StreamWriter writer = File.AppendText(saveFile.FileName))
                 {
                     writer.Write("Average: ");
-                    writer.WriteLine(Math.Round(this.difference.Average.TotalSeconds, 3));
+                    writer.WriteLine(this.difference.Average.TotalSeconds);
                     writer.Write("Median: ");
-                    writer.WriteLine(Math.Round(this.difference.Median.TotalSeconds, 3));
+                    writer.WriteLine(this.difference.Median.TotalSeconds);
                     writer.WriteLine();
                     for (int i = 0; i < difference.Chapters.Count; i++)
                     {
                         writer.Write("Chapter ");
                         writer.Write(i+1);
                         writer.Write(" Average: ");
-                        writer.Write(Math.Round(difference.Chapters[i].Average.TotalSeconds, 3));
+                        writer.Write(difference.Chapters[i].Average.TotalSeconds);
                         writer.Write(" Median: ");
-                        writer.WriteLine(Math.Round(difference.Chapters[i].Median.TotalSeconds, 3));
+                        writer.WriteLine(difference.Chapters[i].Median.TotalSeconds);
                     }
 
                     writer.WriteLine();
@@ -102,7 +102,7 @@ namespace Seshat.xaml
 
                         foreach (AudioPosition audioPosition in chapter.Sentences)
                         {
-                            writer.WriteLine(Math.Round(audioPosition.Position.TotalSeconds, 3));
+                            writer.WriteLine(Math.Abs(audioPosition.Position.TotalSeconds));
                         }
                         c++;
                     }
